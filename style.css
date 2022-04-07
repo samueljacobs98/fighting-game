@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+.header {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  padding: 10px;
+}
+
+.header__health-container {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  /* background-color: yellow; */
+}
+
+.header__health-container--player {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.header__health-bar {
+  position: absolute;
+  /* width: 100%; */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: blue;
+}
+
+.header__health-bar--player {
+  width: 100%;
+}
+
+.header__health-bar--enemy {
+  left: 0;
+}
+
+.header__health {
+  height: 100%;
+  background-color: yellow;
+}
+
+.header__health--player {
+  width: 100%;
+}
+
+/* 
+.header__health--enemy {
+} */
+
+.header__timer {
+  height: 100px;
+  width: 100px;
+  background-color: red;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.result {
+  position: absolute;
+  color: white;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}

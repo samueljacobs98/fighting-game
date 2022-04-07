@@ -1,3 +1,8 @@
+const playerHealth = document.querySelector(".header__health-bar--player");
+const enemyHealth = document.querySelector(".header__health-bar--enemy");
+const timerDisplay = document.querySelector(".header__timer");
+const resultDisplay = document.querySelector(".result");
+
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
@@ -25,6 +30,7 @@ class Sprite {
     };
     this.colour = colour;
     this.isAttacking;
+    this.health = 100;
   }
 
   draw() {
@@ -109,6 +115,33 @@ const rectangularColision = ({ r1, r2 }) => {
   );
 };
 
+const determineWinner = ({ player, enemy, timerId }) => {
+  clearTimeout(timerId);
+  resultDisplay.style.display = "flex";
+  if (player.health === enemy.health) {
+    resultDisplay.innerHTML = "Tie";
+  } else if (player.health > enemy.health) {
+    resultDisplay.innerHTML = "Player 1 Wins";
+  } else if (player.health < enemy.health) {
+    resultDisplay.innerHTML = "Player 2 Wins";
+  }
+};
+
+let timer = 60;
+let timerId;
+const decreaseTimer = () => {
+  if (timer > 0) {
+    timer--;
+    timerDisplay.innerHTML = timer;
+    timerId = setTimeout(decreaseTimer, 1000);
+  }
+  if (timer === 0) {
+    determineWinner({ player, enemy, timerId });
+  }
+};
+
+decreaseTimer();
+
 const animate = () => {
   window.requestAnimationFrame(animate);
   c.fillStyle = "black";
@@ -137,11 +170,20 @@ const animate = () => {
   // detect collision
   if (rectangularColision({ r1: player, r2: enemy }) && player.isAttacking) {
     player.isAttacking = false;
+    enemy.health -= 20;
+    enemyHealth.style.width = enemy.health + "%";
     console.log("go");
   }
   if (rectangularColision({ r1: enemy, r2: player }) && enemy.isAttacking) {
     enemy.isAttacking = false;
+    player.health -= 20;
+    playerHealth.style.width = player.health + "%";
     console.log("enemy attack successful");
+  }
+
+  // end game based on health
+  if (enemy.health <= 0 || player.health <= 0) {
+    determineWinner({ player, enemy, timerId });
   }
 };
 
