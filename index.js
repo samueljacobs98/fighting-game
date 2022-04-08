@@ -12,70 +12,51 @@ canvas.height = 576;
 c.fillRect(0, 0, canvas.width, canvas.height);
 
 const gravity = 0.7;
-class Sprite {
-  constructor({ position, velocity, colour = "red", offset }) {
-    this.position = position;
-    this.velocity = velocity;
-    this.width = 50;
-    this.height = 150;
-    this.lastKey;
-    this.attackBox = {
-      position: {
-        x: this.position.x,
-        y: this.position.y,
-      },
-      offset,
-      width: 100,
-      height: 50,
-    };
-    this.colour = colour;
-    this.isAttacking;
-    this.health = 100;
-  }
 
-  draw() {
-    c.fillStyle = this.colour;
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    if (this.isAttacking) {
-      c.fillStyle = "green";
-      c.fillRect(
-        this.attackBox.position.x,
-        this.attackBox.position.y,
-        this.attackBox.width,
-        this.attackBox.height
-      );
-    }
-  }
+const background = new Sprite({
+  position: {
+    x: 0,
+    y: 0,
+  },
+  imageSrc: "./assets/images/background.png",
+});
 
-  update() {
-    this.draw();
-    this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
-    this.attackBox.position.y = this.position.y;
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-    if (this.position.y + this.height + this.velocity.y >= canvas.height) {
-      this.velocity.y = 0;
-    } else {
-      this.velocity.y += gravity;
-    }
-  }
+const shop = new Sprite({
+  position: {
+    x: 600,
+    y: 128,
+  },
+  imageSrc: "./assets/images/shop.png",
+  scale: 2.75,
+  framesMax: 6,
+});
 
-  attack() {
-    this.isAttacking = true;
-    setTimeout(() => {
-      this.isAttacking = false;
-    }, 100);
-  }
-}
-
-const player = new Sprite({
+const player = new Fighter({
   position: { x: 0, y: 0 },
   velocity: { x: 0, y: 10 },
   offset: { x: 0, y: 0 },
+  imageSrc: "./assets/images/samuraiMack/Idle.png",
+  framesMax: 8,
+  scale: 2.5,
+  offset: { x: 215, y: 157 },
+  sprites: {
+    idle: {
+      imageSrc: "./assets/images/samuraiMack/Idle.png",
+      framesMax: 8,
+    },
+    run: {
+      imageSrc: "./assets/images/samuraiMack/Run.png",
+      framesMax: 8,
+    },
+    jump: {
+      imageSrc: "./assets/images/samuraiMack/Jump.png",
+      framesMax: 2,
+    },
+  },
 });
 player.draw();
 
-const enemy = new Sprite({
+const enemy = new Fighter({
   position: { x: 400, y: 100 },
   velocity: { x: 0, y: 0 },
   colour: "blue",
@@ -104,60 +85,34 @@ const keys = {
   },
 };
 
-let lastKey;
-
-const rectangularColision = ({ r1, r2 }) => {
-  return (
-    r1.attackBox.position.x + r1.attackBox.width >= r2.position.x &&
-    r1.attackBox.position.x <= r2.position.x + r2.width &&
-    r1.attackBox.position.y + r1.attackBox.height >= r2.position.y &&
-    r1.attackBox.position.y <= r2.position.y + r2.height
-  );
-};
-
-const determineWinner = ({ player, enemy, timerId }) => {
-  clearTimeout(timerId);
-  resultDisplay.style.display = "flex";
-  if (player.health === enemy.health) {
-    resultDisplay.innerHTML = "Tie";
-  } else if (player.health > enemy.health) {
-    resultDisplay.innerHTML = "Player 1 Wins";
-  } else if (player.health < enemy.health) {
-    resultDisplay.innerHTML = "Player 2 Wins";
-  }
-};
-
-let timer = 60;
-let timerId;
-const decreaseTimer = () => {
-  if (timer > 0) {
-    timer--;
-    timerDisplay.innerHTML = timer;
-    timerId = setTimeout(decreaseTimer, 1000);
-  }
-  if (timer === 0) {
-    determineWinner({ player, enemy, timerId });
-  }
-};
-
 decreaseTimer();
 
 const animate = () => {
   window.requestAnimationFrame(animate);
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
+  background.update();
+  shop.update();
   player.update();
-  enemy.update();
+  // enemy.update();
 
   // reset x velocities
   player.velocity.x = 0;
   enemy.velocity.x = 0;
 
   // player movement
+  player.image = player.sprites.idle.image;
   if (keys.a.pressed && player.lastKey === "a") {
     player.velocity.x = -5;
+    player.image = player.sprites.run.image;
   } else if (keys.d.pressed && player.lastKey === "d") {
+    player.image = player.sprites.run.image;
     player.velocity.x = 5;
+  }
+
+  if (player.velocity.y < 0) {
+    player.image = player.sprites.jump.image;
+    player.framesMax = player.sprites.jump.framesMax;
   }
 
   // enemy movement
